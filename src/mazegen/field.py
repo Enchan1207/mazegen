@@ -2,7 +2,9 @@
 # フィールド
 #
 from enum import Enum, auto
-from typing import List
+from typing import Any, Generator, List
+
+from .position import Position
 
 
 class TileType(Enum):
@@ -10,6 +12,9 @@ class TileType(Enum):
 
     Wall = auto()
     """壁"""
+
+    Unbreakable = auto()
+    """破壊不能な壁"""
 
     Aisle = auto()
     """通路"""
@@ -64,39 +69,48 @@ class Field:
     def height(self) -> int:
         return self._height
 
-    def get_tile(self, x: int, y: int) -> TileType:
+    def get_tile(self, at: Position) -> TileType:
         """指定座標のタイル種別を返す
 
         Args:
-            x (int): x座標
-            y (int): y座標
-
-        Raises:
-            ValueError: 範囲外の座標が渡された場合
+            at (Position): 座標
 
         Returns:
             TileType: 指定座標のタイル種別
         """
-        if x < 0 or y < 0 or x >= self._width or y >= self._height:
-            raise ValueError(f"index out of range (field size:{self._width}x{self._height}, but specified ({x},{y}))")
+        if self._is_valid_pos(at):
+            return TileType.Unbreakable
 
-        return self._field[y * self._width + x]
+        return self._field[at.y * self._width + at.x]
 
-    def set_tile(self, x: int, y: int, tiletype: TileType):
+    def set_tile(self, at: Position, tiletype: TileType):
         """指定座標のタイル種別を設定する
 
         Args:
-            x (int): x座標
-            y (int): y座標
+            at (Position): 座標
             tiletype (TileType): 設定する値
 
         Raises:
             ValueError: 範囲外の座標が渡された場合
         """
-        if x < 0 or y < 0 or x >= self._width or y >= self._height:
-            raise ValueError(f"index out of range (field size:{self._width}x{self._height}, but specified ({x},{y}))")
+        if self._is_valid_pos(at):
+            raise ValueError(f"index out of range (field size:{self._width}x{self._height}, but specified {at})")
 
-        self._field[y * self._width + x] = tiletype
+        self._field[at.y * self._width + at.x] = tiletype
+
+    def _is_valid_pos(self, at: Position) -> bool:
+        return at.x < 0 or at.y < 0 or at.x >= self._width or at.y >= self._height
+
+    def fetch_cells(self) -> Generator[tuple[Position, TileType], Any, None]:
+        """全セルを走査するジェネレータを返す
+
+        Yields:
+            Generator[tuple[Position, TileType], Any, None]: セル走査ジェネレータ
+        """
+        for index, tile in enumerate(self._field):
+            x, y = (index % self.width, index // self.width)
+            pos = Position(x, y)
+            yield (pos, tile)
 
     def dump(self) -> str:
         """フィールドの構造をダンプする
