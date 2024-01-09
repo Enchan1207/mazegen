@@ -3,7 +3,7 @@
 #
 import sys
 
-from mazegen.configure.stick_knock import StickKnockConfigurator
+from mazegen.configure.aisle_dig import AisleDigConfigurator
 from mazegen.field import Field
 
 
@@ -13,7 +13,7 @@ def main() -> int:
 
     # シードを渡して棒倒し構成器を初期化
     seed = "ラブライブ!虹ヶ咲学園スクールアイドル同好会"
-    configurator = StickKnockConfigurator(seed)
+    configurator = AisleDigConfigurator(seed)
 
     # 生成
     configurator.configure(field)
