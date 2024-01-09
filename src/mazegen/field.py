@@ -13,6 +13,9 @@ class TileType(Enum):
     Wall = auto()
     """壁"""
 
+    Unbreakable = auto()
+    """破壊不能な壁"""
+
     Aisle = auto()
     """通路"""
 
@@ -76,7 +79,7 @@ class Field:
             TileType: 指定座標のタイル種別
         """
         if self._is_valid_pos(at):
-            return TileType.Wall
+            return TileType.Unbreakable
 
         return self._field[at.y * self._width + at.x]
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Tuple
+from typing import List, Tuple
 
 
 class Direction(Enum):
@@ -22,6 +22,15 @@ class Direction(Enum):
 
     Right = auto()
     """右"""
+
+    @staticmethod
+    def all() -> List[Direction]:
+        """全方向のリストを取得
+
+        Returns:
+            List[Direction]: 方向リスト
+        """
+        return [Direction.Up, Direction.Right, Direction.Down, Direction.Left]
 
     def unit_vec(self) -> Tuple[int, int]:
         """方向が表す単位ベクトルを取得

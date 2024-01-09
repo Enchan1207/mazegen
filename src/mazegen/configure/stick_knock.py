@@ -58,7 +58,7 @@ class StickKnockConfigurator(FieldConfiguratorBase):
             Returns:
                 List[Direction]: 棒を倒せる方向
             """
-            available_dirs: List[Direction] = [Direction.Up, Direction.Down, Direction.Left, Direction.Right]
+            available_dirs: List[Direction] = Direction.all()
 
             # 最上行以外なら上は選ばない
             if wy != 2:
