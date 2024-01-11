@@ -14,9 +14,11 @@ class StickKnockConfigurator(FieldConfiguratorBase):
     """棒倒し法の実装"""
 
     def __init__(self, seed: Optional[Union[int, str, bytes, bytearray, float]] = None):
-        random.seed(seed)
+        self.seed = seed
 
     def configure(self, field: Field):
+        random.seed(self.seed)
+
         # 外壁と格子状の壁を構成
         self._initwall(field)
 
@@ -49,37 +51,38 @@ class StickKnockConfigurator(FieldConfiguratorBase):
             field (Field): フィールド
         """
 
-        def get_knockable_dirs(at: Position) -> List[Direction]:
-            """指定した座標から棒を倒せる方向のリストを生成
-
-            Args:
-                at (Position): フィールド上の位置
-
-            Returns:
-                List[Direction]: 棒を倒せる方向
-            """
-            available_dirs: List[Direction] = Direction.all()
-
-            # 最上行以外なら上は選ばない
-            if wy != 2:
-                available_dirs.remove(Direction.Up)
-
-            # 有効な方向に壁があるなら取り除く
-            for dir in available_dirs:
-                if field.get_tile(at.advanced(dir)) == TileType.Wall:
-                    available_dirs.remove(dir)
-
-            return available_dirs
-
         # 各壁について
         for wy in range(2, field.height - 1, 2):
             for wx in range(2, field.width - 1, 2):
                 # 倒せる方向のリストを取得し
                 pos = Position(wx, wy)
-                direction_candidates = get_knockable_dirs(pos)
+                direction_candidates = self._get_knockable_dirs(field, pos)
                 if len(direction_candidates) == 0:
                     continue
 
                 # ランダムに倒す
                 knock_dir = random.choice(direction_candidates)
                 field.set_tile(pos.advanced(knock_dir), TileType.Wall)
+
+    def _get_knockable_dirs(self, field: Field, at: Position) -> List[Direction]:
+        """指定した座標から棒を倒せる方向のリストを生成
+
+        Args:
+            field (Field): フィールドオブジェクト
+            at (Position): フィールド上の位置
+
+        Returns:
+            List[Direction]: 棒を倒せる方向
+        """
+        dir_candidates: List[Direction] = Direction.all()
+
+        # 最上段以外なら上は選ばない
+        if at.y != 2:
+            dir_candidates.remove(Direction.Up)
+
+        # すでに壁になっている方向には倒せない
+        for dir in dir_candidates:
+            if field.get_tile(at.advanced(dir)) == TileType.Wall:
+                dir_candidates.remove(dir)
+
+        return dir_candidates
